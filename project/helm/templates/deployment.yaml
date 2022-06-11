@@ -5,7 +5,7 @@ metadata:
   labels:
     app: techtrends
   name: techtrends
-  namespace: sandbox
+  namespace: {{ .Values.namespace.name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:

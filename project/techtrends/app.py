@@ -110,17 +110,19 @@ def metrics():
     return response
 
 def configureLogging():
-     ## stream logs to app.log file
+    # format output
     logFormat = '[%(asctime)s]: [%(levelname)s] %(message)s'
-    logging.basicConfig(filename='app.log',level=logging.DEBUG,format=logFormat)
+    
+    # stream logs to app.log file
+    file_handler = logging.FileHandler('app.log')
 
-    formatter = logging.Formatter('[%(asctime)s]: [%(levelname)s] - %(message)s')
-
-    ## stream logs to STDOUT
+    # set logger to handle STDOUT and STDERR
     stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(logging.DEBUG)
-    stdout_handler.setFormatter(formatter)
-    logging.getLogger().addHandler(stdout_handler)
+    stderr_handler = logging.StreamHandler(sys.stderr)
+
+    handlers = [file_handler, stderr_handler, stdout_handler]
+
+    logging.basicConfig(level=logging.DEBUG,format=logFormat,handlers=handlers)
 
 # start the application on port 3111
 if __name__ == "__main__":

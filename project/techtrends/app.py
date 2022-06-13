@@ -50,7 +50,7 @@ def index():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
-      app.logger.info('A non-existing article is accessed and a 404 page is returned.')
+      app.logger.error('A non-existing article is accessed and a 404 page is returned.')
       return render_template('404.html'), 404
     else:
       app.logger.info('Article "%s" retrieved!', post['title'])
@@ -85,15 +85,26 @@ def create():
 
 @app.route('/healthz')
 def healthcheck():
-    response = app.response_class(
-            response=json.dumps({"result":"OK - healthy"}),
-            status=200,
-            mimetype='application/json'
-    )
+    try:
+        # Try getting post count to ensure that database is available
+        post_count = get_post_count()
+        response = app.response_class(
+                response=json.dumps({"result":"OK - healthy"}),
+                status=200,mimetype='application/json'
+        )
 
-    ## log line
-    app.logger.info('Status request successfull')
-    return response
+        ## log line
+        app.logger.info('Status request successfull')
+        return response
+    except Exception:
+        response = app.response_class(
+                response=json.dumps({"result":"ERROR - unhealthy"}),
+                status=500,mimetype='application/json'
+        )
+
+        ## log error
+        app.logger.error('Status request failure.')
+        return response
 
 @app.route('/metrics')
 def metrics():
@@ -112,7 +123,7 @@ def metrics():
 def configureLogging():
     # format output
     logFormat = '[%(asctime)s]: [%(levelname)s] %(message)s'
-    
+
     # stream logs to app.log file
     file_handler = logging.FileHandler('app.log')
 
